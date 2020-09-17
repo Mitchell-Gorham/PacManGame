@@ -1,17 +1,3 @@
-class GameField:
-    lives = ""          # Amount of lives Pac-Man has left
-    score = 0           # The score of the current game
-    level = "1-1"       # The current level
-    time = 0            # Time elapsed while in game
-    difficulty = 1.0    # The current difficulty of the game
-
-    def __init__(self, lives, score, level, time, difficulty):
-        self.lives = lives
-        self.score = score
-        self.level = level
-        self.time = time
-        self.difficulty = difficulty
-
 class Interactable:
     interactableType = ""    # Valid types are: dot, fruit, powerpellet, ghost
     
@@ -32,9 +18,6 @@ class Interactable:
             return ("dedm8")
         else:
             return ("error")
-    
-    def remove():
-        del self
 
 class Movement:
     currentDirection = ""   # The current direction of the object
@@ -63,10 +46,5 @@ class Ghost(Interactable, Movement):
     state = ""          # Valid States are: inactive, active, flee, dead, alternate
 
     def __init__(self, personality, state):
-        super().__init__():
         self.personality = personality
         self.state = state
-
-pinky = Ghost("ghost", "W", "N", 1.0, 35, 934, "Pinky", "inactive")
-print(pinky)
-
