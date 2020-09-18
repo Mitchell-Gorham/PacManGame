@@ -82,8 +82,8 @@ class GameField:
 
         # Check to see if player is on top of an interactable
         for interactable in self.interactables:
-            if self.player.location == interactable.location:
-                interactable.collision(self, self.player)
+            if self.player.position == interactable.location:
+                # interactable.collision(self, self.player)
                 if interractable.interactableType == 'd':
                     self.score += 10
                     interactable.remove()
