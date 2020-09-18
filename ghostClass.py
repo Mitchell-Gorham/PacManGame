@@ -1,4 +1,5 @@
-from .classes.py import Interactable, Movement
+import interactableClass
+import movementClass
 
 class Ghost(Interactable, Movement):
     personality = ""    # Valid personalities are: Inky, Blinky, Pinky, Clyde

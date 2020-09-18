@@ -1,5 +1,5 @@
 from gameClass import *
 
 if __name__ == '__main__':
-    app = App()
-    app.run()
+    game = gameClass()
+    game.run()

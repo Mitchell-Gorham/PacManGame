@@ -1,7 +1,6 @@
 import pygame
 import sys
 import random
-from classes import *
 
 #pygame.init()
 
@@ -12,17 +11,42 @@ class GameField:
         self.level = 1          # The current level
         self.time = 0           # Time elapsed while in game
         self.difficulty = 1.0   # The current difficulty of the game
+        self.state = inactive   # Current game state, viable ones: inactive, active, gameover
 
-        self.player = PacMan("inactive")
+        self.player = 
 
-### Initialisation Functions ###
+### State Functions ###
 
-    def init_events(self):
+    ### Initialisation ###
+    def initEvents(self):
         self.lives = 3
 
-### Game Loop Functions ###
+    ### Active ###
 
-    def loop_events(self):
+
+    ### GameOver ###
+    # resetEvents(self):
+    #
+
+### Game Loop Functions ###
+    def run(self):
+        while.self.running:
+            if self.state == 'inactive':
+                
+            elif state.start == 'active':
+                loopEvents()
+                updateMovement()
+                #activeDraw()
+            elif self.state == 'gameover':
+                #gameoverEvents()
+            else:
+                self.running = False
+
+            self.clock.tick(FPS)
+        pygame.quit()
+        sys.exit()
+
+    def loopEvents(self):
 
         ### Player Key Detection for Movement ###
         for event in pygame.event.get():
@@ -36,12 +60,20 @@ class GameField:
                 if event.type == pygame.K_LEFT or pygame.K_A:
                     self.player.nextDirection = "W"
 
-    def update_movement(self):
+    ### Update Movement for Players and Ghosts ###
+    def updateMovement(self):
         # Update the player's position
 
         # Update the enemies positions
 
-            
+        # Check to see if player is on top of an interactable
+
+
+    ### Life Loss ###
+    def lifeLoss(self):
+        self.lives -= 1 
+        if self.lives == 0:       
+            self.state = "gameover"
 
 
 ### Game Over Functions ###
