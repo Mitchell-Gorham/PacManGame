@@ -13,26 +13,32 @@ class GameField:
         self.difficulty = 1.0   # The current difficulty of the game
         self.state = inactive   # Current game state, viable ones: inactive, active, gameover
 
-        self.player = 
+        self.player = PacMan()  # The Player
 
-### State Functions ###
+        self.interactables = [] # All interactables, including ghosts and dots
+        self.ghosts = []        # Array of the Ghosts
+        self.dots = []          # Array of the Dots
 
     ### Initialisation ###
     def initEvents(self):
         self.lives = 3
 
+    def levelStartEvents(self):
+        ### Moves objects to their starting positions - Does recreate non-ghost interactables
+        pass
+
     ### Active ###
 
 
     ### GameOver ###
-    # resetEvents(self):
-    #
+    def resetEvents(self):
+        pass
 
-### Game Loop Functions ###
+    ### Game Loop Functions ###
     def run(self):
         while.self.running:
             if self.state == 'inactive':
-                
+                pass
             elif state.start == 'active':
                 loopEvents()
                 updateMovement()
@@ -63,10 +69,35 @@ class GameField:
     ### Update Movement for Players and Ghosts ###
     def updateMovement(self):
         # Update the player's position
+        # First check to see if the player's next direction is valid
+        # if it is, set their current direction to the next direction, set next direction to O (null)
+        if self.player.position: # [xPos,yPos] + [1,0]
+            pass
+        # Then, move the player
+        if self.player.currentDirection:
+            pass
 
         # Update the enemies positions
+            # perform similar checks for each of the ghosts
 
         # Check to see if player is on top of an interactable
+        for interactable in self.interactables:
+            if self.player.location == interactable.location:
+                interactType = interactable.collision()
+                if interractType == 'd':
+                    self.score += 10
+                    # remove interactable
+                    self.checkDotCount()
+                elif interactType == 'f':
+                    self.score += 50
+                    # remove interactable
+                elif interactType == 'p':
+                    self.player.powerup()
+                    # remove interactable
+                elif interactType == 'g':
+                    if self.player.state != 'powerup':
+                        self.lifeLost()
+                    else interactable.state = 'dead'
 
 
     ### Life Loss ###
@@ -74,6 +105,14 @@ class GameField:
         self.lives -= 1 
         if self.lives == 0:       
             self.state = "gameover"
+            break()
+        if self.difficulty > 1.1:
+            self.difficulty -= 0.2  # Slightly lower the difficulty on death
+        self.lifeRestartEvent()
+    
+    ### Reset player and enemy positions and start game delay again ###
+    def lifeRestartEvent():
+        pass
 
 
-### Game Over Functions ###
+    ### Game Over Functions ###
