@@ -5,13 +5,13 @@ import random
 #pygame.init()
 
 class GameField:
-    def __init__(self, lives, score, level, time, difficulty):
+    def __init__(self, lives, score, level, time, difficulty, state, player, interactables, ghosts, dots):
         self.lives = 3          # Amount of lives Pac-Man has left
         self.score = 0          # The score of the current game
         self.level = 1          # The current level
         self.time = 0           # Time elapsed while in game
         self.difficulty = 1.0   # The current difficulty of the game
-        self.state = inactive   # Current game state, viable ones: inactive, active, gameover
+        self.state = 'inactive'   # Current game state, viable ones: inactive, active, gameover
 
         self.player = PacMan()  # The Player
 
@@ -83,18 +83,19 @@ class GameField:
         # Check to see if player is on top of an interactable
         for interactable in self.interactables:
             if self.player.location == interactable.location:
-                interactType = interactable.collision()
-                if interractType == 'd':
+                interactable.collision(self, self.player)
+                if interractable.interactableType == 'd':
                     self.score += 10
-                    # remove interactable
+                    interactable.remove()
                     self.checkDotCount()
-                elif interactType == 'f':
+                elif interractable.interactableType == 'f':
                     self.score += 50
-                    # remove interactable
-                elif interactType == 'p':
+                    interactable.remove()
+                elif interractable.interactableType == 'p':
                     self.player.powerup()
-                    # remove interactable
-                elif interactType == 'g':
+                    interactable.remove()
+                    self.checkDotCount()
+                elif interractable.interactableType == 'g':
                     if self.player.state != 'powerup':
                         self.lifeLost()
                     else interactable.state = 'dead'
