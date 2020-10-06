@@ -1,19 +1,22 @@
-import pygame
+#import pygame
 import sys
 import random
 
+from pacmanClass import *
+
 #pygame.init()
 
-class GameField:
-    def __init__(self, lives, score, level, time, difficulty, state, player, interactables, ghosts, dots):
+class GameClass:
+    def __init__(self): #, lives, score, level, time, difficulty, state, player, interactables, ghosts, dots):
         self.lives = 3          # Amount of lives Pac-Man has left
         self.score = 0          # The score of the current game
         self.level = 1          # The current level
         self.time = 0           # Time elapsed while in game
         self.difficulty = 1.0   # The current difficulty of the game
+        self.running = False
         self.state = 'inactive'   # Current game state, viable ones: inactive, active, gameover
 
-        self.player = PacMan()  # The Player
+        self.player = PacMan(self.state)  # The Player
 
         self.interactables = [] # All interactables, including ghosts and dots
         self.ghosts = []        # Array of the Ghosts
@@ -36,7 +39,7 @@ class GameField:
 
     ### Game Loop Functions ###
     def run(self):
-        while.self.running:
+        while self.running:
             if self.state == 'inactive':
                 pass
             elif state.start == 'active':
@@ -44,12 +47,13 @@ class GameField:
                 updateMovement()
                 #activeDraw()
             elif self.state == 'gameover':
+                pass
                 #gameoverEvents()
             else:
                 self.running = False
 
             self.clock.tick(FPS)
-        pygame.quit()
+        #pygame.quit()
         sys.exit()
 
     def loopEvents(self):
@@ -98,7 +102,8 @@ class GameField:
                 elif interractable.interactableType == 'g':
                     if self.player.state != 'powerup':
                         self.lifeLost()
-                    else interactable.state = 'dead'
+                    else:
+                        interactable.state = 'dead'
 
 
     ### Life Loss ###
@@ -106,7 +111,6 @@ class GameField:
         self.lives -= 1 
         if self.lives == 0:       
             self.state = "gameover"
-            break()
         if self.difficulty > 1.1:
             self.difficulty -= 0.2  # Slightly lower the difficulty on death
         self.lifeRestartEvent()

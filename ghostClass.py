@@ -1,5 +1,5 @@
-import interactableClass
-import movementClass
+from interactableClass import *
+from movementClass import *
 
 class Ghost(Interactable, Movement):
     personality = ''    # Valid personalities are the integers: 0 (Inky), 1 (Blinky), 2 (Pinky), 3 (Clyde)
