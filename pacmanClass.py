@@ -5,3 +5,6 @@ class PacMan(Movement):
     
     def __init__(self, state):
         self.state = state
+
+    def powerup(self, ):
+        self.state = 'powerup'
