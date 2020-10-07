@@ -1,12 +1,16 @@
 # This file contains constants used for the game 
 
+# DEBUG MODE ON?
+
+DEBUG = True
+
 # Screen and Game size
 WIDTH = 610
-HEIGHT = 670
+HEIGHT = 730
+
+HEIGHTBUFFER = 120  # How much total height is reserved for points, lives, etc.
 
 FPS = 60
-
-
 
 # Colours 
 RED = (255, 0, 0)

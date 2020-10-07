@@ -7,9 +7,5 @@ class Interactable:
     def __init__(self,interactableType):
         self.interactableType = interactableType
     
-    def remove():    # Visually remove this thing
-
-
-
-
-
+    def remove(self):    # Visually remove this thing
+        pass
