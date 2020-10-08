@@ -6,6 +6,7 @@ from settings import *
 
 from pacmanClass import PacMan
 from ghostClass import Ghost
+from interactableClass import Interactable
 
 pygame.init()
 
@@ -17,7 +18,7 @@ class GameClass:
         self.lives = 3          # Amount of lives Pac-Man has left
         self.score = 0          # The score of the current game
         self.hiScore = 63000    # The previous highscore = Loaded from file
-        self.bonuses = [ORANGE, ORANGE, ORANGE, CYAN, ORANGE]       # Bonus fruit collected
+        self.bonuses = [ORANGE, ORANGE, ORANGE, CYAN, ORANGE, RED, PINK]       # Bonus fruit collected
         self.level = 1          # The current level
         self.time = 0           # Time elapsed while in game
         self.difficulty = 1.0   # The current difficulty of the game
@@ -65,7 +66,7 @@ class GameClass:
         self.player.position = [280,530]
         self.player.updatePos()
         
-
+        # Ghost Start Location
         for i in range(4):
             self.ghosts.append(Ghost(self, i, 'inactive'))
         self.ghosts[0].position = [280,290]
@@ -73,11 +74,10 @@ class GameClass:
         for i in range(1, 4):
             self.ghosts[i].position = [240+((i-1)*40),350]
             self.ghosts[i].updatePos()
-        
-        for i in range(4):
-            x = random.choice(["N","N","N", "E","E","E", "S","S","S", "W","W","W", "O"])
-            self.ghosts[i].currentDirection = x
-            print(str(i)+" is given dir: "+str(x))
+
+        for i in range(20):
+            self.interactables.append(Interactable(self, [20+20*i,20*10], 1))
+        print(self.interactables[0].__dict__)
 
         self.updateStaticDraw()
 
@@ -108,9 +108,11 @@ class GameClass:
                 self.loopKeyEvents()
                 self.updateMovement()
                 self.loopDrawEvents()
+
                 self.time = self.time+1
-                if (self.time/10)%2 == 0:
+                if (self.time/10)%50 == 0:
                     self.difficulty = round(self.difficulty + 0.1,2)
+                    self.updateStaticDraw()
 
             elif self.state == 'gameover':
                 self.state == 'init'
@@ -124,16 +126,22 @@ class GameClass:
         sys.exit()
 
     def loopDrawEvents(self):
+        # Background
         self.background = pygame.Surface((WIDTH,HEIGHT-(HEIGHTBUFFER*2)))
-        self.background.fill(BLUE)
+        self.background.fill([40,40,40])
         self.screen.blit(self.background, (0,HEIGHTBUFFER))
-        
-        # Player 
-        self.player.draw()
+
+        # Interactables (Dots/Fruit/Etc)
+        for i in range(len(self.interactables)):
+            self.interactables[i].drawI()
 
         # Ghosts
         for i in range(len(self.ghosts)):
             self.ghosts[i].draw()
+
+        # Player 
+        self.player.draw()
+
 
         pygame.display.update()
 
@@ -160,8 +168,6 @@ class GameClass:
             
     def updateStaticDraw(self):
         self.screen.fill(BLACK)
-
-        # Interactables (Dots/Fruit/Etc)
 
         # Text
         self.drawText(self.screen, 'SCORE', (20,17), 'arial black', 16, WHITE)
@@ -190,46 +196,44 @@ class GameClass:
                     pygame.draw.rect(self.screen, WHITE, rect, 1)
         """
 
+        pygame.display.update()
+
     ### Update Movement for Players and Ghosts ###
     def updateMovement(self):
         # Update the player's position     
         self.player.moveDir()
+        
         for i in range(4):
             self.ghosts[i].moveDir()
         if self.time%50 == 0:
             for i in range(4):
-                x = random.choice(["N","N","N", "E","E","E", "S","S","S", "W","W","W", "O"])
+                x = random.choice(["N","N","N", "E","E","E", "S","S","S", "W","W","W"])
                 self.ghosts[i].currentDirection = x
-                print(str(i)+" is given dir: "+str(x))
-
-        # Update the enemies positions
-            # perform similar checks for each of the ghosts
+                #print(str(i)+" is given dir: "+str(x))
 
         # Check to see if player is on top of an interactable
         for interactable in self.interactables:
             if self.player.position == interactable.location:
-                # interactable.collision(self, self.player)
-                if interactable.interactableType == 'f':
+                if interactable.interactableType == 'c':
                     self.bonuses.append(interactable)
-                elif interactable.interactableType == 'p':
+                elif interactable.interactableType == 1:
                     for i in range(len(self.ghosts)):
                         self.ghosts[i].setFlee()
                 
                 self.score += interactable.score    
-                interactable.remove(self.interactables, i)
+                interactable.remove(self.interactables, self.interactables.index(interactable))
                 self.updateStaticDraw()
                 self.checkDotCount()
-
+        
+        # Or near a ghost
         for ghost in self.ghosts:
             if self.player.position == ghost.position:
                 if ghost.state != 'flee':
-                    self.lifeLoss()
+                    #self.lifeLoss()
+                    pass
                 else:
                     ghost.state = 'dead'
         
-
-
-
     ### Life Loss ###
     def lifeLoss(self):
         self.lives -= 1
