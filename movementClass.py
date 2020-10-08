@@ -21,10 +21,10 @@ class Movement:
         self.yPos = yPos
         self.position = [xPos,yPos]
 
-    def moveDir(self):  # Moves in the direction
-        self.nextDirFree()  # Check to see if you can change direction
+    def moveDir(self):          # Moves in the direction
+        self.nextDirFree()      # Check to see if you can change direction
+        self.currentDirFree()   # Then, check to see if you can move in your current direction
         
-        # First, check to see if you can keep moving in your curret direction
         if self.currentDirection == 'N':
             self.position = [int(self.xPos+(0 * self.speed)),
                                 int(self.yPos+(-1 * self.speed))]
@@ -44,42 +44,49 @@ class Movement:
 
     def nextDirFree(self):  # Are you able to go in your desired nextDirection
         if self.nextDirection == 'N':
-            if self.yPos-10 <= HEIGHTBUFFER/2 + self.speed:   #Replace Pos?10 with Cell/Sprite Size
-                self.currentDirection = 'O'
-                self.nextDirection = 'O'
+            if self.yPos - PLAYERRADIUS - self.speed <= HEIGHTBUFFER:
+                pass
             else:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
 
         if self.nextDirection == 'E':
-            if self.xPos+10 >= WIDTH-10 - self.speed:   #Replace Pos?10 with Cell/Sprite Size
-                self.currentDirection = 'O'
-                self.nextDirection = 'O'
+            if self.xPos + PLAYERRADIUS + self.speed >= WIDTH-10:
+                pass
             else:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
 
         if self.nextDirection == 'S':
-            if self.yPos+20 >= (HEIGHT-(HEIGHTBUFFER/2)) - self.speed:   #Replace Pos?20 (Why is it 20? idk) with Cell/Sprite Size
-                self.currentDirection = 'O'
-                self.nextDirection = 'O'
+            if self.yPos + PLAYERRADIUS + self.speed >= HEIGHT-HEIGHTBUFFER:
+                pass
             else:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
 
         if self.nextDirection == 'W':
-            if self.xPos-10 <= 10 + self.speed:   #Replace Pos?10 with Cell/Sprite Size
-                self.currentDirection = 'O'
-                self.nextDirection = 'O'
+            if self.xPos - PLAYERRADIUS - self.speed <= 10:
+                pass
             else:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
-
     
-    def inBounds(self, direction):
-        if direction == 'N':
-            pass
+    def currentDirFree(self):  # Are you able to go in your desired currentDirection
+        if self.currentDirection == 'N':
+            if self.yPos - PLAYERRADIUS - self.speed <= HEIGHTBUFFER:
+                self.currentDirection = 'O'
 
+        if self.currentDirection == 'E':
+            if self.xPos + PLAYERRADIUS + self.speed >= WIDTH:
+                self.currentDirection = 'O'
+
+        if self.currentDirection == 'S':
+            if self.yPos + PLAYERRADIUS + self.speed >= HEIGHT-HEIGHTBUFFER:
+                self.currentDirection = 'O'
+        
+        if self.currentDirection == 'W':
+            if self.xPos - PLAYERRADIUS - self.speed <= 0:
+                self.currentDirection = 'O'
 
     def updatePos(self):
         self.xPos = self.position[0]

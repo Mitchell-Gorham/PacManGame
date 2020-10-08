@@ -9,9 +9,6 @@ class PacMan(Movement):
         self.view = view
         self.state = state
 
-    def powerup(self, ):
-        self.state = 'powerup'
-
     def draw(self):
         pygame.draw.circle(self.view.screen, YELLOW, (self.xPos, self.yPos),10)
         
