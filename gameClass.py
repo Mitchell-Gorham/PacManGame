@@ -1,42 +1,50 @@
-import pygame
 import sys
-import random
+from math import floor
+import pygame
 from settings import *
 
 from pacmanClass import PacMan
+from ghostClass import Ghost
 
 pygame.init()
 
 
 
 class GameClass:
-    def __init__(self): #, lives, score, level, time, difficulty, state, player, interactables, ghosts, dots):
+    def __init__(self):
         self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
         self.lives = 3          # Amount of lives Pac-Man has left
         self.score = 0          # The score of the current game
+        self.hiScore = 63000    # The previous highscore = Loaded from file
+        self.bonuses = [RED,CYAN,YELLOW,BLUE,ORANGE]  # Bonus fruit collected
         self.level = 1          # The current level
         self.time = 0           # Time elapsed while in game
         self.difficulty = 1.0   # The current difficulty of the game
+
         self.running = True     # Core Game Loop Active
         self.state = 'init'     # Current game state, viable ones: init, inactive, active, gameover
-        
-        self.statePrev = ''     # Debug
-        self.nextDir = ''       # Debug
 
-        self.player = PacMan(self, self.state)  # The Player
+        self.player = PacMan(self, 'active')  # The Player
 
         self.interactables = [] # All interactables, including ghosts and dots
         self.ghosts = []        # Array of the Ghosts
         self.dots = []          # Array of the Dots
+        
+        self.statePrev = ''     # Debug
+        self.nextDir = ''       # Debug
 
         pygame.display.set_caption('PacMan')
+        
+
         self.run()
 
     ### Initialisation ###
-    def initDrawEvents(self):
-                
+   
+    def initDrawEvents(self):             
         self.screen.fill(BLACK)
-        self.drawText(self.screen, 'SPACEBAR TO START', (WIDTH/2,HEIGHT/2), 'arial black', 16, WHITE)
+        self.drawText(self.screen,'SPACEBAR TO START',
+                     (WIDTH/2-100,HEIGHT/2), 'arial black',                        
+                     16, WHITE)
 
         pygame.display.update()
 
@@ -47,10 +55,18 @@ class GameClass:
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 #First run init events
                 self.state = 'active'
+                self.levelStartEvents()
+                
 
     def levelStartEvents(self):
         ### Moves objects to their starting positions - Does recreate non-ghost interactables
-        pass
+        for i in range(4):
+            self.ghosts.append(Ghost(self, i, 'inactive'))
+        self.ghosts[0].position = [350,350]
+        self.ghosts[0].updatePos()
+        for i in range(1, 4):
+            self.ghosts[i].position = [300+((i-1)*50),400]
+            self.ghosts[i].updatePos()
 
     ### Active ###
     def checkDotCount(self):
@@ -72,15 +88,18 @@ class GameClass:
                 self.statePrev = self.state
 
             if self.state == 'init':
-                self.initKeyEvents()
                 self.initDrawEvents()
+                self.initKeyEvents()
             elif self.state == 'active':
                 self.loopKeyEvents()
                 self.updateMovement()
                 self.loopDrawEvents()
+                self.time = self.time+1
+                if (self.time/10)%2 == 0:
+                    self.difficulty = round(self.difficulty + 0.1,2)
                 #activeDraw()
             elif self.state == 'gameover':
-                pass
+                self.state == 'init'
                 #gameoverEvents()
                 #save the score or something
                 #Go back to the init phase
@@ -94,18 +113,37 @@ class GameClass:
         # Maze
         self.screen.fill(BLACK)
         self.background = pygame.Surface((WIDTH-20,HEIGHT-HEIGHTBUFFER-10))
-        self.background.fill(BLUE)
+        #self.background.fill(BLUE)
         self.screen.blit(self.background, (10,HEIGHTBUFFER/2))
 
-        #Player 
+        # Player 
         self.player.draw()
 
-        #Ghosts
+        # Ghosts
+        for i in range(len(self.ghosts)):
+            self.ghosts[i].draw()
 
+        # Interactables
 
-        #Interactables
+        # Upper Text
+        self.drawText(self.screen, 'SCORE', (10,15), 'arial black', 16, WHITE)
+        self.drawText(self.screen, str(self.score), (10,30), 'arial black', 16, WHITE)
 
+        self.drawText(self.screen, 'HI-SCORE', (int(WIDTH/2),15), 'arial black', 16, WHITE)
+        self.drawText(self.screen, str(self.hiScore), (int(WIDTH/2),30), 'arial black', 16, WHITE)
 
+        if DEBUG:
+            self.drawText(self.screen, 'time: {}'.format(floor(self.time/10)), ((WIDTH-60),15), 'arial black', 10, WHITE)
+            self.drawText(self.screen, 'diff: {}'.format(self.difficulty), ((WIDTH-60),25), 'arial black', 10, WHITE)
+
+        
+        # Lower Text
+
+        for i in range(self.lives):
+            pygame.draw.circle(self.screen, YELLOW, (35+(25*i), int(HEIGHT-HEIGHTBUFFER/2+5)),10)
+        for i in range(len(self.bonuses)):
+            pygame.draw.circle(self.screen, self.bonuses[i], (WIDTH-35-(25*i), int(HEIGHT-HEIGHTBUFFER/2+5)),10)
+        
         pygame.display.update()
 
     def loopKeyEvents(self):
@@ -122,22 +160,19 @@ class GameClass:
                     self.player.nextDirection = "S"
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     self.player.nextDirection = "W"
-            
-            # Debug
+            # Debug    
+                if DEBUG and event.key == pygame.K_ESCAPE:
+                    self.running = False
             if DEBUG and self.nextDir != self.player.nextDirection:
-                print('Moving: '+ self.player.nextDirection)
+                print('Next Move: '+ self.player.nextDirection)
                 self.nextDir = self.player.nextDirection
             
 
 
     ### Update Movement for Players and Ghosts ###
     def updateMovement(self):
-        # Update the player's position
-        # First check to see if the player's next direction is valid
-        # if it is, set their current direction to the next direction, set next direction to O (null)
-        
+        # Update the player's position     
         self.player.moveDir()
-      
 
         # Update the enemies positions
             # perform similar checks for each of the ghosts
@@ -157,11 +192,13 @@ class GameClass:
                     self.player.powerup()
                     interactable.remove()
                     self.checkDotCount()
-                elif interactable.interactableType == 'g':
-                    if self.player.state != 'powerup':
-                        self.lifeLoss()
-                    else:
-                        interactable.state = 'dead'
+        
+        for ghost in self.ghosts:
+            if self.player.position == ghost.position:
+                if self.player.state != 'powerup':
+                    self.lifeLoss()
+                else:
+                    interactable.state = 'dead'
 
 
     ### Life Loss ###
