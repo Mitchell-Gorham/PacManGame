@@ -1,4 +1,4 @@
-from movementClass import *
+from movementClass import Movement
 from settings import YELLOW
 import pygame
 

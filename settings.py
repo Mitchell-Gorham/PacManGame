@@ -8,10 +8,18 @@ DEBUG = True
 WIDTH = 560
 HEIGHT = 740
 
+HEIGHTBUFFER = 60 
+
 ROWS = 37
 COLUMNS = 28
 
-HEIGHTBUFFER = 60  # How much total height is reserved for points, lives, etc.
+GAMEWIDTH = WIDTH
+GAMEHEIGHT = HEIGHT-HEIGHTBUFFER*2
+
+CELLWIDTH = int(GAMEWIDTH/COLUMNS)
+CELLHEIGHT = int(GAMEHEIGHT/(ROWS-6))
+
+ # How much total height is reserved for points, lives, etc.
 
 FPS = 60
 
@@ -30,4 +38,4 @@ BLACK = (0, 0, 0)
 
 # Game Settings
 
-BONUSLIFE = 10000   # When the player recieves a bonus life
+BONUSLIFE = 10000   # The point intervals that the player recieves a bonus life at

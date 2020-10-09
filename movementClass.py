@@ -8,18 +8,20 @@ from settings import *
 class Movement:
     currentDirection = 'O'   # The current direction of the object: N, E, S ,W, O
     nextDirection = 'O'      # The next planned direction of the object: N, E, S ,W, O
-    speed = 2.0             # The speed of the object
-    xPos = 0                # The x position of the object
-    yPos = 0                # The y position of the object
-    position = [xPos,yPos]  # The x and y positions of the object
+    speed = 2.0              # The speed of the object
+    xPos = 0                 # The x position of the object
+    yPos = 0                 # The y position of the object
+    position = [xPos,yPos]   # The x and y positions of the object
+    gridPos = []             # The grid position of the object on the game field
 
-    def __init__(self, currentDirection, nextDirection, speed,xPos,yPos):
+    def __init__(self, currentDirection, nextDirection, speed, xPos, yPos):
         self.currentDirection = currentDirection
         self.nextDirection = nextDirection
         self.speed = speed
         self.xPos = xPos
         self.yPos = yPos
         self.position = [xPos,yPos]
+        self.updatePos()
 
     def moveDir(self):          # Moves in the direction
         self.nextDirFree()      # Check to see if you can change direction
@@ -91,4 +93,8 @@ class Movement:
     def updatePos(self):
         self.xPos = self.position[0]
         self.yPos = self.position[1]
+        self.gridPos = [ self.xPos//CELLWIDTH , self.yPos//CELLHEIGHT ]
+    
+
+
     
