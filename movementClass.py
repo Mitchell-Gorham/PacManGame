@@ -2,31 +2,24 @@
 # E = [1, 0] 
 # S = [0, 1] 
 # W = [-1, 0]
-
-from settings import *
+import os
+from settings import CELLWIDTH, CELLHEIGHT, WIDTH
 
 class Movement:
     currentDirection = 'O'   # The current direction of the object: N, E, S ,W, O
-    nextDirection = 'O'      # The next planned direction of the object: N, E, S ,W, O
+    nextDirection = 'O'      # The next planned direction of the object: N, E, S , W, O
     speed = 2.0              # The speed of the object
     xPos = 0                 # The x position of the object
     yPos = 0                 # The y position of the object
     position = [xPos,yPos]   # The x and y positions of the object
     gridPos = []             # The grid position of the object on the game field
+    spawnPos = [xPos,yPos]
+    canMove = True
 
-    def __init__(self, currentDirection, nextDirection, speed, xPos, yPos):
-        self.currentDirection = currentDirection
-        self.nextDirection = nextDirection
-        self.speed = speed
-        self.xPos = xPos
-        self.yPos = yPos
-        self.position = [xPos,yPos]
-        self.updatePos()
+    def moveDir(self, controller):          # Moves in the direction
+        self.nextDirFree(controller)      # Check to see if you can change direction
+        self.currentDirFree(controller)   # Then, check to see if you can move in your current direction
 
-    def moveDir(self):          # Moves in the direction
-        self.nextDirFree()      # Check to see if you can change direction
-        self.currentDirFree()   # Then, check to see if you can move in your current direction
-        
         if self.currentDirection == 'N':
             self.position = [int(self.xPos+(0 * self.speed)),
                                 int(self.yPos+(-1 * self.speed))]
@@ -39,62 +32,90 @@ class Movement:
         elif self.currentDirection == 'W':
             self.position = [int(self.xPos+(-1 * self.speed)),
                                 int(self.yPos+(0 * self.speed))]
-        else:
-            pass
+
         # Reflect these changes in positon to your x and y coords
+        self.checkTele()
         self.updatePos()
 
-    def nextDirFree(self):  # Are you able to go in your desired nextDirection
+
+
+    def nextDirFree(self, controller):  # Are you able to go in your desired nextDirection
+        self.canMove = True
         if self.nextDirection == 'N':
-            if self.yPos - PLAYERRADIUS - self.speed <= HEIGHTBUFFER:
-                pass
-            else:
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0], self.gridPos[1]-1]:
+                    # Can't go this way right now, hold onto currDir and nextDir for later
+                    self.canMove = False
+                    break   
+            if self.canMove:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
 
-        if self.nextDirection == 'E':
-            if self.xPos + PLAYERRADIUS + self.speed >= WIDTH-10:
-                pass
-            else:
+        elif self.nextDirection == 'E':
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0]+1, self.gridPos[1]]:
+                    self.canMove = False
+                    break   
+            if self.canMove:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
 
-        if self.nextDirection == 'S':
-            if self.yPos + PLAYERRADIUS + self.speed >= HEIGHT-HEIGHTBUFFER:
-                pass
-            else:
+        elif self.nextDirection == 'S':
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0], self.gridPos[1]+1]:
+                    self.canMove = False
+                    break   
+            if self.canMove:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
 
-        if self.nextDirection == 'W':
-            if self.xPos - PLAYERRADIUS - self.speed <= 10:
-                pass
-            else:
+        elif self.nextDirection == 'W':
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0]-1, self.gridPos[1]]:
+                    self.canMove = False
+                    break   
+            if self.canMove:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
-    
-    def currentDirFree(self):  # Are you able to go in your desired currentDirection
+
+    def currentDirFree(self, controller):  # Are you able to go in your desired currentDirection
         if self.currentDirection == 'N':
-            if self.yPos - PLAYERRADIUS - self.speed <= HEIGHTBUFFER:
-                self.currentDirection = 'O'
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0], self.gridPos[1]-1]:
+                    self.currentDirection = 'O'
+                    break
 
-        if self.currentDirection == 'E':
-            if self.xPos + PLAYERRADIUS + self.speed >= WIDTH:
-                self.currentDirection = 'O'
+        elif self.currentDirection == 'E':
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0]+1, self.gridPos[1]]:
+                    self.currentDirection = 'O'
+                    break                   
 
-        if self.currentDirection == 'S':
-            if self.yPos + PLAYERRADIUS + self.speed >= HEIGHT-HEIGHTBUFFER:
-                self.currentDirection = 'O'
+        elif self.currentDirection == 'S':
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0], self.gridPos[1]+1]:
+                    self.currentDirection = 'O'
+                    break
         
-        if self.currentDirection == 'W':
-            if self.xPos - PLAYERRADIUS - self.speed <= 0:
-                self.currentDirection = 'O'
+        elif self.currentDirection == 'W':
+            for wall in controller.walls:
+                if wall.gridPos == [self.gridPos[0]-1, self.gridPos[1]]:
+                    self.currentDirection = 'O'
+                    break
+
+    def checkTele(self):
+        if self.gridPos == [28,17] and self.currentDirection == 'E': # and self.currentDirection != 'W':
+            self.position = [-10, 340]
+        elif self.gridPos == [28,17] and self.currentDirection != 'W':
+            self.currentDirection = 'E'
+            self.checkTele()
+        if self.gridPos == [-1,17] and self.currentDirection == 'W': # and self.currentDirection != 'E':
+            self.position = [WIDTH+10, 340]
+        elif self.gridPos == [-1,17] and self.currentDirection != 'E':
+            self.currentDirection = 'W'
+            self.checkTele()
 
     def updatePos(self):
         self.xPos = self.position[0]
         self.yPos = self.position[1]
-        self.gridPos = [ self.xPos//CELLWIDTH , self.yPos//CELLHEIGHT ]
-    
-
-
-    
+        self.gridPos = [ self.xPos//CELLWIDTH , self.yPos//CELLHEIGHT ]    

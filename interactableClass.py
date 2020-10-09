@@ -24,7 +24,7 @@ class Interactable:
     def remove(self, interactList, value):    # Visually remove this thing
         interactList.pop(value)
 
-    def drawI(self):
+    def draw(self):
         if self.interactableType == 0:
             pygame.draw.circle(self.view.screen, YELLOW, (self.xPos, self.yPos),3)
         elif self.interactableType == 1:
