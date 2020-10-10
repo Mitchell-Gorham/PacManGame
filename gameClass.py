@@ -95,10 +95,12 @@ class GameClass:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                #First run init events
-                self.state = 'loop'
-                self.initLevelStart()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.state = 'loop'
+                    self.initLevelStart()
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
 
     def initLevelStart(self): # Sets up the level based on a fed .txt file
         # Cleans out  level arrays
@@ -148,8 +150,7 @@ class GameClass:
                     self.player.nextDirection = 'S'
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     self.player.nextDirection = 'W'
-            # Debug    
-                if DEBUG and event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE:
                     self.running = False
             
     def loopUpdateMovement(self):
@@ -197,7 +198,7 @@ class GameClass:
 
             self.updateStaticDraw()
 
-            self.difficulty = round(self.difficulty + 2.1, 1)
+            self.difficulty = round(self.difficulty + 0.1, 1)
 
         # Reduce lifespan of Fruits
         if self.fruits:
@@ -323,10 +324,11 @@ class GameClass:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                #First run init events
-                self.resetGame()
-
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.resetGame()
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
     ### Other Fuctions ###
 
     def drawText(self, screen, text, position, fontStyle, size, colour, centered=False):
