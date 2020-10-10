@@ -1,5 +1,5 @@
 from movementClass import Movement
-from settings import DEBUG, STYLE, RED, CYAN, PINK, ORANGE, BLUE, WHITE, PLAYERRADIUS, CELLWIDTH, CELLHEIGHT
+from settings import DEBUG, STYLE, RED, CYAN, PINK, ORANGE, BLUE, WHITE, PLAYERRADIUS, CELLWIDTH, CELLHEIGHT, FPS
 from math import hypot
 from random import choice
 import pygame
@@ -19,6 +19,10 @@ class Ghost(Movement):
         self.xTar = 0
         self.yTar = 0
         self.nextGrid = [0,0]
+        self.dotsToActivate = personality-1 * 30
+        if self.dotsToActivate < 0: self.dotsToActiavte = 0
+        
+        self.setFleeTimer()
 
     def draw(self):
         if STYLE:
@@ -47,8 +51,18 @@ class Ghost(Movement):
             return self.colour[self.personality]
 
     def setFlee(self):
-        if self.state != 'dead':
+        if self.state not in ('inactive','activated','dead'):
             self.state = 'flee'
+    
+    def setFleeTimer(self):
+        self.fleeTimer = (8-self.controller.difficulty)*FPS
+        if self.fleeTimer <= 0: self.fleeTimer = 1
+
+    def fleeTimerTick(self):
+        self.fleeTimer -= 1
+        if self.fleeTimer <= 0:
+            self.setFleeTimer()
+            self.state = 'chase'
 
     def getScatterGrid(self):    # replace with CELL stuff to allow for game size changes
         if self.personality == 0:
@@ -60,7 +74,9 @@ class Ghost(Movement):
         elif self.personality == 3:
             return [1,34]
         return [14,14]
-    
+
+
+
     def getTarget(self, origin, x, y):
         # DO STUFF HERE
         return [origin[0]+x, origin[1]+y]

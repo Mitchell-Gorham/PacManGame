@@ -5,7 +5,7 @@ import random
 from settings import *
 from pacmanClass import PacMan
 from ghostClass import Ghost
-from interactableClass import Interactable
+from interactableClass import Interactable, Fruit
 from wallClass import Wall
 
 import pygame
@@ -35,6 +35,7 @@ class GameClass:
 
         self.walls = []         # Contains the location of walls
         self.interactables = [] # Contains dots and power pellets
+        self.fruits = []
         
         
         self.statePrev = ''     # Debug
@@ -59,20 +60,12 @@ class GameClass:
                 self.initKeyEvents()
             elif self.state == 'loop':
                 self.loopKeyEvents()
-                self.updateMovement()
+                self.loopUpdateMovement()
+                self.loopCollisionCheck()
+                
+                self.loopTimeEvents()
+                
                 self.loopDrawEvents()
-
-                self.time = self.time+1
-                if (self.time/10)%50 == 0:
-                    self.difficulty = round(self.difficulty + 0.1,2)
-                    self.updateStaticDraw()
-                #if self.time%500 == 0:
-                #    print('Swapping State')
-                #    for ghost in self.ghosts:
-                #        if ghost.state == 'chase':
-                #            ghost.state = 'scatter'
-                #        elif ghost.state == 'scatter':
-                #            ghost.state = 'chase'
 
             elif self.state == 'gameover':
                 self.goDrawEvents()
@@ -111,6 +104,7 @@ class GameClass:
         # Cleans out  level arrays
         self.walls = []
         self.interactables = []
+        self.fruits = []
 
         ### Moves objects to their starting positions
         self.resetPlayerGhostPositions()
@@ -158,7 +152,7 @@ class GameClass:
                 if DEBUG and event.key == pygame.K_ESCAPE:
                     self.running = False
             
-    def updateMovement(self):
+    def loopUpdateMovement(self):
         # Update the player's position 
         if DEBUG and self.nextDir != self.player.nextDirection:
             #print('Next Move: '+ self.player.nextDirection)
@@ -168,13 +162,11 @@ class GameClass:
         for ghost in self.ghosts:
             ghost.personalityFunc()
             
-        
+    def loopCollisionCheck(self):
         # Check to see if player shares a grid with an interactable
         for interactable in self.interactables:
             if interactable.gridPos == self.player.gridPos:
-                if interactable.interactableType >= 2:
-                    self.bonuses.append(interactable)
-                elif interactable.interactableType == 1:
+                if interactable.interactableType == 1:
                     self.ghostBonusMulti = 1
                     for i in range(len(self.ghosts)):
                         self.ghosts[i].setFlee()
@@ -182,6 +174,11 @@ class GameClass:
                 self.updateScore(interactable.score)              
                 interactable.remove(self.interactables, self.interactables.index(interactable))
                 self.checkDotCount()
+
+        for fruit in self.fruits:
+            if fruit.gridPos == self.player.gridPos:
+                self.updateScore(fruit.score)
+                fruit.remove(self.fruits, self.fruits.index(fruit))
         
         # Or shares it with a ghost!
         for ghost in self.ghosts:
@@ -192,6 +189,34 @@ class GameClass:
                     self.updateScore((200*self.ghostBonusMulti))
                     self.ghostBonusMulti *= 2
                     ghost.state = 'dead'
+                    ghost.setFleeTimer()
+
+    def loopTimeEvents(self):
+        self.time += 1
+        if (self.time/10)%50 == 0:
+
+            self.updateStaticDraw()
+
+            self.difficulty = round(self.difficulty + 2.1, 1)
+
+        # Reduce lifespan of Fruits
+        if self.fruits:
+            for fruit in self.fruits:
+                if fruit.timerTick():
+                    fruit.remove(self.fruits, self.fruits.index(fruit))
+
+        # Reduce ghost fear duration
+        for ghost in self.ghosts:
+            if ghost.state == 'flee':
+                ghost.fleeTimerTick()
+
+        #if self.time%500 == 0:
+        #    print('Swapping State')
+        #    for ghost in self.ghosts:
+        #        if ghost.state == 'chase':
+        #            ghost.state = 'scatter'
+        #        elif ghost.state == 'scatter':
+        #            ghost.state = 'chase'
 
     def loopDrawEvents(self):
         # Background
@@ -206,6 +231,8 @@ class GameClass:
         # Interactables (Dots/Fruit/Etc)
         for i in range(len(self.interactables)):
             self.interactables[i].draw()
+        for i in range(len(self.fruits)):
+            self.fruits[i].draw()
 
         # Ghosts
         for i in range(len(self.ghosts)):
@@ -355,10 +382,23 @@ class GameClass:
         pygame.display.update()
 
     def checkDotCount(self):
-        ### Counts the amount of dots+powerups left, if it's 0, go to the next level
+        # Fruit Spawns
+        if len(self.interactables) == 170:
+            self.spawnFruit()
+        if len(self.interactables) == 70:
+            self.spawnFruit()
+
+        # Counts the amount of dots+powerups left, if it's 0, go to the next level
         if len(self.interactables) <= 0:
             self.level += 1
             self.state = 'init'
+
+    def spawnFruit(self):
+        fruitLevel = 1+self.level
+        if fruitLevel > 8:
+            fruitLevel = 8
+        self.fruits.append(Fruit(self, [280,410], fruitLevel, FPS*10))
+        pass
 
     def lifeLoss(self):
         self.lives -= 1
@@ -372,6 +412,8 @@ class GameClass:
         self.resetPlayerGhostPositions()
 
     def resetPlayerGhostPositions(self):
+        self.fruits = []
+
         self.player.position = [280,530]
         self.player.updatePos()
         self.player.currentDirection = 'O'
@@ -386,7 +428,7 @@ class GameClass:
                 ghost.currentDirection = 'O'
                 ghost.nextDirection = 'O'        
             else:
-                ghost.state = 'inactive'
+                ghost.state = 'chase'
                 ghost.position = [240+((ghost.personality-1)*40),350]
                 ghost.spawnPos = ghost.position
                 ghost.updatePos()

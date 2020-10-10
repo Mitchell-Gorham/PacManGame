@@ -1,8 +1,8 @@
 # This file contains constants used for the game 
 
 # DEBUG MODE ON?
-DEBUG = True
-STYLE = False
+DEBUG = False
+STYLE = True
 
 # Screen and Game size
 WIDTH = 560

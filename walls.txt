@@ -10,11 +10,11 @@ w000000ww0000ww0000ww000000w
 wwwwww0wwwww ww wwwww0wwwwww 
      w0wwwww ww wwwww0w         
      w0ww          ww0w
-     w0ww www_wwww ww0w
-wwwwww0ww wii iiiw ww0wwwwww
-      0   w      w   0          
-wwwwww0ww wiiiiiiw ww0wwwwww
-     w0ww wwwwwwww ww0w
+     w0ww www wwww ww0w
+wwwwww0ww www wwww ww0wwwwww
+      0              0          
+wwwwww0ww wwww www ww0wwwwww
+     w0ww wwww www ww0w
      w0ww          ww0w
      w0ww wwwwwwww ww0w
 wwwwww0ww wwwwwwww ww0wwwwww
