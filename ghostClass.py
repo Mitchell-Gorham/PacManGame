@@ -1,6 +1,7 @@
 from movementClass import Movement
 from settings import DEBUG, STYLE, RED, CYAN, PINK, ORANGE, BLUE, WHITE, PLAYERRADIUS, CELLWIDTH, CELLHEIGHT
 from math import hypot
+from random import choice
 import pygame
 
 class Ghost(Movement):
@@ -64,43 +65,51 @@ class Ghost(Movement):
         # DO STUFF HERE
         return [origin[0]+x, origin[1]+y]
 
-    def personalityFunc(self, controller):
+    def personalityFunc(self):
         # Default state - Ghosts act according to their personality
         if self.state == 'chase':
+            self.speed = 2
             # Blinky - Personality
             if self.personality == 0:    # Blinky aims for the player's current grid pos
+                if len(self.controller.interactables) <= 20:
+                    self.speed = 4
+                elif len(self.controller.interactables) <= 140:
+                    self.speed = 3
+                else:
+                    self.speed = 2
+
                 self.xTar, self.yTar = 0, 0
-                self.targetGrid = self.getTarget(controller.player.gridPos, self.xTar, self.yTar)
+                self.targetGrid = self.getTarget(self.controller.player.gridPos, self.xTar, self.yTar)
 
             # Pinky - Personality
             elif self.personality == 1:  # Pinky aims for the player's current grid pos + 4 in their current dir
-                if controller.player.currentDirection == 'N':
+                if self.controller.player.currentDirection == 'N':
                     self.xTar = 0
                     self.yTar = -4
-                elif controller.player.currentDirection == 'E':
+                elif self.controller.player.currentDirection == 'E':
                     self.xTar = 4
                     self.yTar = 0
-                elif controller.player.currentDirection == 'S':
+                elif self.controller.player.currentDirection == 'S':
                     self.xTar = 0
                     self.yTar = 4
-                elif controller.player.currentDirection == 'W':
+                elif self.controller.player.currentDirection == 'W':
                     self.xTar = -4
                     self.yTar = 0
 
-                self.targetGrid = self.getTarget(controller.player.gridPos, self.xTar, self.yTar)
+                self.targetGrid = self.getTarget(self.controller.player.gridPos, self.xTar, self.yTar)
 
             #Inky - Personality
             elif self.personality == 2:  # Inky uses the player's current location as well as Blinky's to hunt
-                if controller.player.currentDirection == 'N':
+                if self.controller.player.currentDirection == 'N':
                     self.xTar = 0
                     self.yTar = -2
-                elif controller.player.currentDirection == 'E':
+                elif self.controller.player.currentDirection == 'E':
                     self.xTar = 2
                     self.yTar = 0
-                elif controller.player.currentDirection == 'S':
+                elif self.controller.player.currentDirection == 'S':
                     self.xTar = 0
                     self.yTar = 2
-                elif controller.player.currentDirection == 'W':
+                elif self.controller.player.currentDirection == 'W':
                     self.xTar = -2
                     self.yTar = 0
                 else:
@@ -109,44 +118,67 @@ class Ghost(Movement):
 
                 # offset 2 ahead of pacman, get distance of RED to this offset, double it, there's your target x,y offsets
 
-                self.xTar = controller.ghosts[0].gridPos[0]-controller.player.gridPos[0]+self.xTar
-                self.yTar = controller.ghosts[0].gridPos[1]-controller.player.gridPos[1]+self.yTar
+                self.targetGrid = self.getTarget(self.controller.player.gridPos, self.xTar, self.yTar)
 
-                
+                self.xTar = self.controller.player.gridPos[0] - self.controller.ghosts[0].gridPos[0]+self.xTar
+                self.yTar = self.controller.player.gridPos[1] - self.controller.ghosts[0].gridPos[1]+self.yTar              
 
-                self.targetGrid = self.getTarget(controller.player.gridPos, self.xTar, self.yTar)
+                self.targetGrid = self.getTarget(self.targetGrid, self.xTar, self.yTar)
 
-
-            
             # Clyde - Personality
             elif self.personality == 3:
                 self.xTar, self.yTar = 0, 0
-                self.targetGrid = self.getTarget(controller.player.gridPos, self.xTar, self.yTar)
+                self.targetGrid = self.getTarget(self.controller.player.gridPos, self.xTar, self.yTar)
                 if (self.gridPos[0] - 4 <= self.targetGrid[0] <= self.gridPos[0] + 4) or (self.gridPos[1] - 4 <= self.targetGrid[1] <= self.gridPos[1] + 4):
                     self.targetGrid = self.scatterGrid
             
         # Second state - Ghosts enter this state at set intervals
         elif self.state == 'scatter':
+            self.speed = 2
             self.targetGrid = self.scatterGrid
             # Blinky heads to the NE corner
             # Pinky heads to the NW coner
             # Inky heads to the SE corner
             # Clyde heads to the SW corner
 
+        # Third State - Ghosts entere this state when PacMan eats an energizer
         elif self.state == 'flee':
-            #
-            #[-2,0,2,0] [0,-2,0,2]
-            pass
+            self.speed = 1
+            self.xTar = choice([-2,0,2,0])
+            self.yTar = choice([0,-2,0,2])
+
+            self.targetGrid = self.getTarget(self.gridPos, self.xTar, self.yTar)
 
         elif self.state == 'dead':
+            self.speed = 6
             self.targetGrid = [ self.spawnPos[0]//CELLWIDTH , self.spawnPos[1]//CELLHEIGHT ]
             if self.gridPos == self.targetGrid:
+                self.state = 'activated'
+        
+        elif self.state == 'activated':
+            self.speed = 1
+            self.targetGrid = [14,14]
+            if self.gridPos == self.targetGrid:
                 self.state = 'chase'
+        
+        elif self.state == 'inactive':
+            self.targetGrid = self.gridPos
 
-        self.getNextMove(controller)
-        self.moveDir(controller)
+        # Slow Zones - Override Speed Here - Teleport Walkway
+        for i in range(0, 6):
+            if self.gridPos == ([i,17]):
+                self.speed //= 2      
+            elif self.gridPos == ([22+i,17]):
+                self.speed //= 2
+            
+        if self.speed < 1:
+             self.speed = 1
+        
 
-    def getNextMove(self, controller):
+        self.getNextMove()
+        self.moveDir(self.controller, self.state)
+
+    def getNextMove(self):
         self.distanceToGrid = []
         self.dist = 0
         self.moveOffset = [0,0]
@@ -156,54 +188,53 @@ class Ghost(Movement):
 
         # Get list of available moves to make and store in self.gridList
         if self.currentDirection == 'N':
-            #if (self.gridPos[0], self.gridPos[1] - 1) not in controller.indexedWalls:
-            if not any(wall.gridPos == [self.gridPos[0],self.gridPos[1]-1] for wall in controller.walls):
+            if not any(wall.gridPos == [self.gridPos[0],self.gridPos[1]-1] for wall in self.controller.walls):
                 self.nextGrid = [self.gridPos[0],self.gridPos[1]-1]
             for x in range(-1, 2, 1):
                 if x in (-1, 1):
-                    if not any(wall.gridPos == [self.nextGrid[0]+x,self.nextGrid[1]] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0]+x,self.nextGrid[1]] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0]+x,self.nextGrid[1]])
                 if x == 0:
-                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]-1] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]-1] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0],self.nextGrid[1]-1])
         
         elif self.currentDirection == 'E':
-            if not any(wall.gridPos == [self.gridPos[0]+1,self.gridPos[1]] for wall in controller.walls):
+            if not any(wall.gridPos == [self.gridPos[0]+1,self.gridPos[1]] for wall in self.controller.walls):
                 self.nextGrid = [self.gridPos[0]+1,self.gridPos[1]]
             for y in range(-1, 2, 1):
                 if y in (-1, 1):
-                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]+y] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]+y] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0],self.nextGrid[1]+y])
                 if y == 0:
-                    if not any(wall.gridPos == [self.nextGrid[0]+1,self.nextGrid[1]] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0]+1,self.nextGrid[1]] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0]+1,self.nextGrid[1]])
 
         elif self.currentDirection == 'S':
-            if not any(wall.gridPos == [self.gridPos[0],self.gridPos[1]+1] for wall in controller.walls):
+            if not any(wall.gridPos == [self.gridPos[0],self.gridPos[1]+1] for wall in self.controller.walls):
                 self.nextGrid = [self.gridPos[0],self.gridPos[1]+1]
             for x in range(-1, 2, 1):
                 if x in (-1, 1):
-                    if not any(wall.gridPos == [self.nextGrid[0]+x,self.nextGrid[1]] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0]+x,self.nextGrid[1]] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0]+x,self.nextGrid[1]])
                 if x == 0:
-                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]+1] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]+1] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0],self.nextGrid[1]+1])
 
         elif self.currentDirection == 'W':
-            if not any(wall.gridPos == [self.gridPos[0]-1,self.gridPos[1]] for wall in controller.walls):
+            if not any(wall.gridPos == [self.gridPos[0]-1,self.gridPos[1]] for wall in self.controller.walls):
                 self.nextGrid = [self.gridPos[0]-1,self.gridPos[1]]
             for y in range(-1, 2, 1):
                 if y in (-1, 1):
-                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]+y] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0],self.nextGrid[1]+y] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0],self.nextGrid[1]+y])
                 if y == 0:
-                    if not any(wall.gridPos == [self.nextGrid[0]-1,self.nextGrid[1]] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0]-1,self.nextGrid[1]] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0]-1,self.nextGrid[1]])
 
         elif self.currentDirection == 'O':
             self.nextGrid = [self.gridPos[0], self.gridPos[1]]
             for x, y in zip((0, 1, 0, -1), (-1, 0, 1, 0)):
-                    if not any(wall.gridPos == [self.nextGrid[0]+x,self.nextGrid[1]+y] for wall in controller.walls):
+                    if not any(wall.gridPos == [self.nextGrid[0]+x,self.nextGrid[1]+y] for wall in self.controller.walls):
                         self.gridList.append([self.nextGrid[0]+x,self.nextGrid[1]+y])
 
         # Use self.gridList to determine which grid is closest to target grid
@@ -214,6 +245,7 @@ class Ghost(Movement):
         if len(self.distanceToGrid) > 0:
             self.moveOffset = self.distanceToGrid.index(min(self.distanceToGrid))
         else:
+            
             self.gridList = [[0,0]]
             self.moveOffset = 0
 

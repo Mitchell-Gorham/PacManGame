@@ -1,9 +1,8 @@
 # This file contains constants used for the game 
 
 # DEBUG MODE ON?
-
 DEBUG = True
-STYLE = True
+STYLE = False
 
 # Screen and Game size
 WIDTH = 560
@@ -19,8 +18,6 @@ GAMEHEIGHT = HEIGHT-HEIGHTBUFFER*2
 
 CELLWIDTH = int(GAMEWIDTH/COLUMNS)
 CELLHEIGHT = int(GAMEHEIGHT/(ROWS-6))
-
- # How much total height is reserved for points, lives, etc.
 
 FPS = 60
 
@@ -38,5 +35,4 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 # Game Settings
-
 BONUSLIFE = 10000   # The point intervals that the player recieves a bonus life at

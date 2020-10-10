@@ -2,13 +2,13 @@ from movementClass import Movement
 from settings import YELLOW, PLAYERRADIUS, CELLHEIGHT, CELLWIDTH, HEIGHTBUFFER, STYLE
 import pygame
 
-class PacMan(Movement):
-    state = ''         
+class PacMan(Movement):   
     
     def __init__(self, controller, state):
         super().__init__()
         self.controller = controller
         self.state = state  # Valid states are: inactive, active, dead
+        self.speed = 3
 
     def draw(self):
         if STYLE:
