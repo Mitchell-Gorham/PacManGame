@@ -31,7 +31,7 @@ class GameClass:
         self.player = PacMan(self, 'active')  # The Player
         self.ghosts = []        # Array of the Ghosts
         for i in range(4):
-            self.ghosts.append(Ghost(self, i, 'inactive'))
+            self.ghosts.append(Ghost(self, i, 'chase'))
 
         self.walls = []         # Contains the location of walls
         self.interactables = [] # Contains dots, power pellets and bonus fruits
@@ -65,7 +65,8 @@ class GameClass:
 
     def levelStartEvents(self):
         ### Moves objects to their starting positions
-
+        self.walls = []
+        self.interactables = []
         # PacMan Start Location
         self.player.position = [280,530]
         self.player.updatePos()
@@ -81,6 +82,7 @@ class GameClass:
                 ghost.currentDirection = 'O'
                 ghost.nextDirection = 'O'        
             else:
+                ghost.state = 'chase'
                 ghost.position = [240+((ghost.personality-1)*40),350]
                 ghost.spawnPos = ghost.position
                 ghost.updatePos()
@@ -108,14 +110,13 @@ class GameClass:
                             int(char)
                             ))
 
-        print(self.walls[5].gridPos)
         self.updateStaticDraw()
 
     ### Active ###
     def checkDotCount(self):
         ### Counts the amount of dots+powerups left, if it's 0, go to the next level
         if len(self.interactables) <= 0:
-            pass
+            self.levelStartEvents()
 
     ### GameOver ###
     def resetEvents(self):
@@ -143,6 +144,13 @@ class GameClass:
                 if (self.time/10)%50 == 0:
                     self.difficulty = round(self.difficulty + 0.1,2)
                     self.updateStaticDraw()
+                #if self.time%500 == 0:
+                #    print('Swapping State')
+                #    for ghost in self.ghosts:
+                #        if ghost.state == 'chase':
+                #            ghost.state = 'scatter'
+                #        elif ghost.state == 'scatter':
+                #            ghost.state = 'chase'
 
             elif self.state == 'gameover':
                 self.state == 'init'
@@ -196,14 +204,28 @@ class GameClass:
 
             for ghost in self.ghosts:
                 self.ghostRect = pygame.Rect(ghost.gridPos[0]*CELLWIDTH, ghost.gridPos[1]*CELLHEIGHT,CELLWIDTH,CELLHEIGHT)
-                pygame.draw.rect(self.screen, ghost.colourFunc(), self.ghostRect,1)
+                pygame.draw.rect(self.screen, ghost.colour[ghost.personality], self.ghostRect,1)
                 self.ghostRect = pygame.Rect(ghost.targetGrid[0]*CELLWIDTH, ghost.targetGrid[1]*CELLHEIGHT,CELLWIDTH,CELLHEIGHT)
-                pygame.draw.rect(self.screen, ghost.colourFunc(), self.ghostRect,1)
+                pygame.draw.rect(self.screen, ghost.colour[ghost.personality], self.ghostRect,1)
                 self.ghostRect = pygame.Rect(ghost.nextGrid[0]*CELLWIDTH, ghost.nextGrid[1]*CELLHEIGHT,CELLWIDTH,CELLHEIGHT)
-                pygame.draw.rect(self.screen, ghost.colourFunc(), self.ghostRect,1)
-                for i in ghost.gridList:
+                pygame.draw.rect(self.screen, ghost.colour[ghost.personality], self.ghostRect,1)
+                #print({ 'gridList': ghost.gridList, 'dist': ghost.distanceToGrid })
+                for idx, i in enumerate(ghost.gridList):
                     self.ghostRect = pygame.Rect(i[0]*CELLWIDTH, i[1]*CELLHEIGHT,CELLWIDTH,CELLHEIGHT)
-                    pygame.draw.rect(self.screen, ghost.colourFunc(), self.ghostRect,1)
+                    pygame.draw.rect(self.screen, ghost.colour[ghost.personality], self.ghostRect,1)
+
+                    self.drawText(self.screen, ghost.nextDirection, [ghost.xPos-15, ghost.yPos-15], 'arial black', 8, WHITE)
+
+                    #self.drawText(self.screen, str(round(ghost.distanceToGrid[idx], 1)), [self.ghostRect[0], self.ghostRect[1]], 'arial black', 8, WHITE)
+
+                if i == 2:
+                    self.drawText(self.screen, str(ghost.xTar, ghost.yTar), [ghost.xPos-25, ghost.yPos], 'arial black', 8, WHITE)
+                
+                pygame.draw.line(self.screen,
+                                ghost.colour[ghost.personality],
+                                (ghost.xPos, ghost.yPos),
+                                (ghost.targetGrid[0]*CELLWIDTH+10, ghost.targetGrid[1]*CELLHEIGHT+10),
+                                1)
 
                 ghost.gridList = []
 
@@ -267,22 +289,7 @@ class GameClass:
         self.player.moveDir(self)
         for ghost in self.ghosts:
             ghost.personalityFunc(self)
-
-        
-        for ghost in self.ghosts:
-            ghost.moveDir(self)
-            if self.time%10 == 0:
-                x = random.choice(['N','E','S','W'])
-                if ghost.currentDirection == 'N' and x != 'S':
-                    ghost.nextDirection = x
-                elif ghost.currentDirection == 'E' and x != 'W':
-                    ghost.nextDirection = x
-                elif ghost.currentDirection == 'S' and x != 'N':
-                    ghost.nextDirection = x
-                elif ghost.currentDirection == 'W' and x != 'E':
-                    ghost.nextDirection = x
-                else:
-                    ghost.nextDirection = x
+            
         
         # Check to see if player shares a grid with an interactable
         for interactable in self.interactables:
@@ -290,6 +297,7 @@ class GameClass:
                 if interactable.interactableType >= 2:
                     self.bonuses.append(interactable)
                 elif interactable.interactableType == 1:
+                    self.ghostBonusMulti = 1
                     for i in range(len(self.ghosts)):
                         self.ghosts[i].setFlee()
                 

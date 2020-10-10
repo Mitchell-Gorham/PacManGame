@@ -3,6 +3,7 @@
 # DEBUG MODE ON?
 
 DEBUG = True
+STYLE = True
 
 # Screen and Game size
 WIDTH = 560

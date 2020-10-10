@@ -6,15 +6,16 @@ import os
 from settings import CELLWIDTH, CELLHEIGHT, WIDTH
 
 class Movement:
-    currentDirection = 'O'   # The current direction of the object: N, E, S ,W, O
-    nextDirection = 'O'      # The next planned direction of the object: N, E, S , W, O
-    speed = 2.0              # The speed of the object
-    xPos = 0                 # The x position of the object
-    yPos = 0                 # The y position of the object
-    position = [xPos,yPos]   # The x and y positions of the object
-    gridPos = []             # The grid position of the object on the game field
-    spawnPos = [xPos,yPos]
-    canMove = True
+    
+    def __init__(self):
+        self.currentDirection = 'O'   # The current direction of the object: N, E, S ,W, O
+        self.nextDirection = 'O'      # The next planned direction of the object: N, E, S , W, O
+        self.speed = 2.0              # The speed of the object
+        self.xPos = 0                 # The x position of the object
+        self.yPos = 0                 # The y position of the object
+        self.position = [self.xPos,self.yPos]   # The x and y positions of the object
+        self.gridPos = []             # The grid position of the object on the game field
+        self.spawnPos = [self.xPos,self.yPos]
 
     def moveDir(self, controller):          # Moves in the direction
         self.nextDirFree(controller)      # Check to see if you can change direction
@@ -40,7 +41,30 @@ class Movement:
 
 
     def nextDirFree(self, controller):  # Are you able to go in your desired nextDirection
-        self.canMove = True
+        canMove = True
+        nextLocations = {
+            'N': [self.gridPos[0], self.gridPos[1] - 1],
+            'E': [self.gridPos[0] + 1, self.gridPos[1]],
+            'S': [self.gridPos[0], self.gridPos[1] + 1],
+            'W': [self.gridPos[0] - 1, self.gridPos[1]]
+        }
+
+        if self.nextDirection not in nextLocations:
+            return
+
+        nextPosition = nextLocations[self.nextDirection]
+
+        for wall in controller.walls:
+            if wall.gridPos == nextPosition:
+                canMove = False
+                break
+        if canMove:
+            self.currentDirection = self.nextDirection
+            self.nextDirection = 'O'
+
+        return
+
+    """
         if self.nextDirection == 'N':
             for wall in controller.walls:
                 if wall.gridPos == [self.gridPos[0], self.gridPos[1]-1]:
@@ -77,7 +101,7 @@ class Movement:
             if self.canMove:
                 self.currentDirection = self.nextDirection
                 self.nextDirection = 'O'
-
+    """
     def currentDirFree(self, controller):  # Are you able to go in your desired currentDirection
         if self.currentDirection == 'N':
             for wall in controller.walls:

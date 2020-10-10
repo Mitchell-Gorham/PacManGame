@@ -1,14 +1,18 @@
 from movementClass import Movement
-from settings import YELLOW
+from settings import YELLOW, PLAYERRADIUS, CELLHEIGHT, CELLWIDTH, HEIGHTBUFFER, STYLE
 import pygame
 
 class PacMan(Movement):
-    state = ''         # Valid states are: inactive, active, powerup, dead
+    state = ''         
     
-    def __init__(self, view, state):
-        self.view = view
-        self.state = state
+    def __init__(self, controller, state):
+        super().__init__()
+        self.controller = controller
+        self.state = state  # Valid states are: inactive, active, dead
 
     def draw(self):
-        pygame.draw.circle(self.view.screen, YELLOW, (self.xPos, self.yPos),10)
+        if STYLE:
+            pygame.draw.circle(self.controller.screen, YELLOW, (self.gridPos[0]*CELLHEIGHT+(CELLHEIGHT//2), self.gridPos[1]*CELLWIDTH+(CELLWIDTH//2)),PLAYERRADIUS)
+        else:
+            pygame.draw.circle(self.controller.screen, YELLOW, (self.xPos, self.yPos),PLAYERRADIUS)
         

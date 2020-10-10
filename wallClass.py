@@ -3,10 +3,10 @@ from settings import BLUE, CELLWIDTH, CELLHEIGHT, HEIGHTBUFFER
 import pygame
 
 class Wall:
-    xPos = 0
+    """ xPos = 0
     yPos = 0
     location = [xPos,yPos]
-    gridPos = []
+    gridPos = [] """
 
     def __init__(self, view, location):
         self.view = view
