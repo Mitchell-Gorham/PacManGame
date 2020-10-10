@@ -1,8 +1,15 @@
+import sys
 # This file contains constants used for the game 
 
 # DEBUG MODE ON?
 DEBUG = False
 STYLE = True
+
+# Check System
+if sys.platform in ["win32", "win64"]:
+    SYSTEM = True
+else:
+    SYSTEM = False
 
 # Screen and Game size
 WIDTH = 560

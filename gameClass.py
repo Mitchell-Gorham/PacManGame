@@ -14,7 +14,8 @@ pygame.init()
 
 class GameClass:
     def __init__(self):
-        self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
+        if SYSTEM: self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
+        else: self.screen = pygame.display.set_mode((WIDTH,HEIGHT), pygame.FULLSCREEN)      
         self.lives = 2          # Amount of lives Pac-Man has left
         self.score = 0          # The score of the current game
         self.hiScore = 25000    # The previous highscore = Loaded from file
@@ -73,7 +74,10 @@ class GameClass:
 
             else:
                 self.running = False
-            pygame.time.Clock().tick(FPS)
+            if SYSTEM:
+                pygame.time.Clock().tick(FPS)
+            else:
+                pygame.time.Clock().tick_busy_loop(FPS)
         pygame.quit()
         sys.exit()
 
