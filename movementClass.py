@@ -9,7 +9,7 @@ class Movement:
     def __init__(self):
         self.currentDirection = 'O'   # The current direction of the object: N, E, S ,W, O
         self.nextDirection = 'O'      # The next planned direction of the object: N, E, S , W, O
-        self.speed = 2.0              # The speed of the object
+        self.speed = 2.0              # The default speed of the object
         self.xPos = 0                 # The x position of the object
         self.yPos = 0                 # The y position of the object
         self.position = [self.xPos,self.yPos]   # The x and y positions of the object

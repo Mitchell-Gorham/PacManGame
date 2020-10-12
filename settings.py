@@ -2,7 +2,7 @@ import sys
 # This file contains constants used for the game 
 
 # DEBUG MODE ON?
-DEBUG = False
+DEBUG = True
 STYLE = True
 
 # Check System

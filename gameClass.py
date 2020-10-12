@@ -20,7 +20,7 @@ class GameClass:
         self.score = 0          # The score of the current game
         self.hiScore = 25000    # The previous highscore = Loaded from file
         self.ghostBonusMulti = 1
-        self.bonuses = [ORANGE, ORANGE, ORANGE, CYAN, ORANGE, RED, PINK] # Bonus fruit collected
+        self.bonuses = [RED] # Bonus fruit collected
         self.lifeBonus = BONUSLIFE # Points needed for bonus life
         self.level = 1          # The current level
         self.time = 0           # Time elapsed while in game
@@ -50,7 +50,6 @@ class GameClass:
 
     def run(self):
         while self.running:
-
             # Debug
             if DEBUG and self.statePrev != self.state:
                 print('Now running in: '+ self.state)
@@ -63,17 +62,14 @@ class GameClass:
                 self.loopKeyEvents()
                 self.loopUpdateMovement()
                 self.loopCollisionCheck()
-                
                 self.loopTimeEvents()
-                
                 self.loopDrawEvents()
-
             elif self.state == 'gameover':
                 self.goDrawEvents()
                 self.goKeyEvents()
-
             else:
                 self.running = False
+            # Increment Game Time
             if SYSTEM:
                 pygame.time.Clock().tick(FPS)
             else:
@@ -278,7 +274,7 @@ class GameClass:
 
                     self.drawText(self.screen, ghost.nextDirection, [ghost.xPos-15, ghost.yPos-15], 'arial black', 8, WHITE)
 
-                    #self.drawText(self.screen, str(round(ghost.distanceToGrid[idx], 1)), [self.ghostRect[0], self.ghostRect[1]], 'arial black', 8, WHITE)
+                    self.drawText(self.screen, str(round(ghost.distanceToGrid[idx], 1)), [self.ghostRect[0], self.ghostRect[1]], 'arial black', 8, WHITE)
 
                 if i == 2:
                     self.drawText(self.screen, str(ghost.xTar, ghost.yTar), [ghost.xPos-25, ghost.yPos], 'arial black', 8, WHITE)
